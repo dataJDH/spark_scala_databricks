@@ -1,7 +1,7 @@
 // Databricks notebook source
-// Q2 [25 pts]: Analyzing a Large Graph with Spark/Scala on Databricks
+// Analyzing a Large Graph with Spark/Scala on Databricks
 
-// STARTER CODE - DO NOT EDIT THIS CELL
+// STARTER CODE 
 import org.apache.spark.sql.functions.desc
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
@@ -9,15 +9,14 @@ import spark.implicits._
 
 // COMMAND ----------
 
-// STARTER CODE - DO NOT EDIT THIS CELL
+// STARTER CODE
 // Definfing the data schema
 val customSchema = StructType(Array(StructField("answerer", IntegerType, true), StructField("questioner", IntegerType, true),
     StructField("timestamp", LongType, true)))
 
 // COMMAND ----------
 
-// STARTER CODE - YOU CAN LOAD ANY FILE WITH A SIMILAR SYNTAX.
-// MAKE SURE THAT YOU REPLACE THE examplegraph.csv WITH THE mathoverflow.csv FILE BEFORE SUBMISSION.
+// STARTER CODE
 val df = spark.read
    .format("com.databricks.spark.csv")
    .option("header", "false") // Use first line of all files as header
@@ -37,9 +36,7 @@ df.show()
 // COMMAND ----------
 
 // PART 1: Remove the pairs where the questioner and the answerer are the same person.
-// ALL THE SUBSEQUENT OPERATIONS MUST BE PERFORMED ON THIS FILTERED DATA
-
-// ENTER THE CODE BELOW
+// ALL THE SUBSEQUENT OPERATIONS ARE PERFORMED ON THIS FILTERED DATA
 
 //df.dropDuplicates("answerer", "questioner").show()
 //df.distinct().show()
@@ -54,7 +51,6 @@ filterDF.show()
 
 // PART 2: The top-3 individuals who answered the most number of questions - sorted in descending order - if tie, the one with lower node-id gets listed first : the nodes with the highest out-degrees.
 
-// ENTER THE CODE BELOW
 val answered = filterDF.select($"answerer", $"date")
                 .groupBy($"answerer")
                 .agg(count($"date") as "questions_answered")
@@ -68,7 +64,6 @@ answered.show(3)
 
 // PART 3: The top-3 individuals who asked the most number of questions - sorted in descending order - if tie, the one with lower node-id gets listed first : the nodes with the highest in-degree.
 
-// ENTER THE CODE BELOW
 val questioned = filterDF.select($"questioner", $"date")
                     .groupBy($"questioner")
                     .agg(count($"date") as "questions_asked")
@@ -80,7 +75,6 @@ questioned.show(3)
 
 // PART 4: The top-5 most common asker-answerer pairs - sorted in descending order - if tie, the one with lower value node-id in the first column (u->v edge, u value) gets listed first.
 
-// ENTER THE CODE BELOW
 filterDF.select($"answerer", $"questioner", $"date")
   .groupBy($"answerer", $"questioner")
   .agg(count($"date") as "count")
@@ -95,7 +89,6 @@ filterDF.select($"answerer", $"questioner", $"date")
 // Read in the data and extract the month and year from the date column.
 // Hint: Check how we extracted the date from the timestamp.
 
-// ENTER THE CODE BELOW
 filterDF.withColumn("month", month(col("date")))
         .withColumn("year", year(col("date")))
         .filter($"year" === 2010)
@@ -110,7 +103,6 @@ filterDF.withColumn("month", month(col("date")))
 
 // PART 6: List the top-3 individuals with the maximum overall activity, i.e. total questions asked and questions answered.
 
-// ENTER THE CODE BELOW
 answered.union(questioned)
         .select(expr("answerer as userID"), expr("questions_answered as qa"))       
         .groupBy($"userID")
